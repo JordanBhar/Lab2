@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>StudentInfoForm</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+    <script src="js/database.js" defer></script>
+    <script src="js/validation.js" defer></script>
+</head>
+<body>
+
+<div class="container-fluid">
+
+
+    <div class="row">
+
+    </div>
+
+    <div class="row">
+
+        <div class="col">
+
+        </div>
+
+        <form class="col-8" id="" method="get">
+            <div>
+                <h1>Event Registration Form</h1>
+
+
+                <div class="mt-3">
+                    <label>Invitation ID:</label>
+                    <input type="text" class="form-control" placeholder="Invitation ID"/>
+                </div>
+
+                <div class="mt-3">
+                    <label>Your Name:</label>
+                    <input type="text" class="form-control" placeholder="Your Name"/>
+                </div>
+
+                <div class="mt-3">
+                    <label>Company:</label>
+                    <input type="text" class="form-control" placeholder="Company name"/>
+                </div>
+
+                <div class="mt-4">
+                    <label>Type:</label>
+
+                    <div class="container">
+                        <label>sole proprietorship</label>
+                        <input type="radio"  value="sole proprietorship"/>
+
+                        <label>Partnership</label>
+                        <input type="radio"  value="Partnership"/>
+
+                        <label>Corporation</label>
+                        <input type="radio"  value="Corporation"/>
+
+                        <label>Other</label>
+                        <input type="radio"  value="Other"/>
+                    </div>
+
+                </div>
+
+
+                <div  class="alert alert-info mt-3">
+                    <p> Invitation ID, cannot be empty</p>
+                    <p>Your Name, cannot be empty</p>
+                    <p>Company Name, cannot be empty</p>
+                </div>
+
+
+
+                <button class="btn btn-primary">Submit</button>
+                <button class="btn btn-primary bg-secondary">Check Registeration</button>
+                <button class="btn btn-primary bg-warning">Delete Registeration</button>
+            </div>
+        </form>
+
+
+        <div class="col">
+
+        </div>
+
+    </div>
+
+    <div class="row">
+
+    </div>
+
+
+
+</div>
+
+</body>
+</html>
