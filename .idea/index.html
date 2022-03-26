@@ -5,8 +5,7 @@
     <title>StudentInfoForm</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
-    <script src="js/validation.js" defer></script>
-    <script src="js/database.js" defer></script>
+
 </head>
 <body>
 
@@ -30,7 +29,7 @@
 
                 <div class="mt-3">
                     <label for="invid">Invitation ID:</label>
-                    <input id="invid" name="InvId" type="text" class="form-control" placeholder="Invitation ID"/>
+                    <input id="invid" name="invid" type="text" class="form-control" placeholder="Invitation ID"/>
                 </div>
 
                 <div class="mt-3">
@@ -101,7 +100,175 @@
 
     </div>
 
+    <script type="text/javascript">
 
+        let db;
+        let openRequest = indexedDB.open("CompanyInfoDB",2);
+
+        openRequest.onupgradeneeded = function(e) {
+            var DB = e.target.result;
+            if(!DB.objectStoreNames.contains("Company")) {
+                //tables name is People
+                const companyTable = DB.createObjectStore("Company", {keyPath: "id"});
+            }
+        };
+
+        openRequest.onsuccess = function(e) {
+            db = e.target.result;
+
+        };
+        openRequest.onerror = function(e) {
+            //console.dir(e);
+            // ..do error notification
+        }
+
+        function addCompany(ID, Name , CompanyName){
+            var addEvent = {id: ID , name: Name, companyname: CompanyName ,created: new Date()}
+
+            //open a read/write transaction
+            var tx = makeTX("Company","readwrite");
+
+            //create object store
+            var transaction = tx.objectStore("Company");
+
+            //make a request to add a new item
+            var request = transaction.add(addEvent)
+
+            request.onsuccess = (ev) => {
+                console.log('successfully added an object');
+                clearForm()
+                //move on to the next request in the transaction or
+                //commit the transaction
+            };
+            request.onerror = (err) => {
+                console.log('error in request to add');
+            };
+
+        }
+
+        function checkCompany(){
+
+            let id = document.getElementById("invid").value
+
+
+            var tx = makeTX("Company","readwrite");
+
+            //create object store
+            var transaction = tx.objectStore("Company");
+
+            var request = transaction.get(id)
+
+            request.onsuccess = (ev) => {
+                console.log('successfully loaded an object');
+                console.log(ev.target.result)
+                let loadedEvent = {id: ev.target.result.id , name: ev.target.result.name, companyname: ev.target.result.companyname ,created: ev.target.result.created}
+
+                document.getElementById("invid").innerHTML = loadedEvent.id
+                document.getElementById("name").innerHTML = loadedEvent.name
+                document.getElementById("companyname").innerHTML;
+
+
+
+            };
+            request.onerror = (err) => {
+                console.log('error in request to delete');
+            };
+
+        }
+
+        function deleteCompany(evt){
+
+            let id = document.getElementById("invid").value
+
+
+            var tx = makeTX("Company","readwrite");
+
+            //create object store
+            var transaction = tx.objectStore("Company");
+
+            //make a request to add a new item
+            var request = transaction.delete(id)
+
+            request.onsuccess = (ev) => {
+                console.log('successfully deleted an object');
+                clearForm()
+                //move on to the next request in the transaction or
+                //commit the transaction
+            };
+            request.onerror = (err) => {
+                console.log('error in request to delete');
+            };
+
+        }
+
+        FormEventListener()
+
+        function FormEventListener() {
+            let addButton = document.getElementById("addCompany").addEventListener("click", validateForm)
+            let deleteButton = document.getElementById("removeCompany").addEventListener("click", deleteCompany)
+            let checkButton = document.getElementById("checkCompany").addEventListener("click", checkCompany)
+        }
+
+        function validateForm(evt) {
+
+            let isValid = false;
+
+            let id = document.getElementById("invid").value
+            let name = document.getElementById("name").value
+            let companyName = document.getElementById("companyname").value
+            let companyType = document.querySelectorAll('input[type="radio"]:checked');
+
+            if (isEmpty(id)){
+                document.getElementById("error1").hidden = true
+            }else {
+                document.getElementById("error1").hidden = false
+            }
+
+            if (isEmpty(name)){
+                document.getElementById("error2").hidden = true
+            }else {
+                document.getElementById("error2").hidden = false
+            }
+
+            if (isEmpty(companyName)){
+                document.getElementById("error3").hidden = true
+            }else {
+                document.getElementById("error3").hidden = false
+            }
+
+
+            isValid = isEmpty(id) && isEmpty(name) && isEmpty(companyName)
+
+            if (!isValid){
+                console.log("Inputs Invalid: Please fill all inputs")
+                //need to make a display message appear when we add data
+            }else {
+                addCompany(id, name, companyName)
+                //need to make a display message appear when we add data
+            }
+
+        }
+
+        function isEmpty(input){
+            return (input.length > 0)
+        }
+
+        function makeTX(storeName, mode) {
+            let tx = db.transaction(storeName, mode);
+            tx.onerror = (err) => {
+                console.warn(err);
+            };
+            return tx;
+
+
+        }
+
+        function clearForm(ev) {
+            if (ev) ev.preventDefault();
+            document.CompanyForm.reset();
+
+        }
+    </script>
 
 </div>
 
