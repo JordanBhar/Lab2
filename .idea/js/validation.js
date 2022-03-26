@@ -33,6 +33,7 @@ function addCompany(ID, Name , CompanyName){
 
     request.onsuccess = (ev) => {
         console.log('successfully added an object');
+        clearForm()
         //move on to the next request in the transaction or
         //commit the transaction
     };
@@ -61,7 +62,7 @@ function deleteCompany(evt){
 
     request.onsuccess = (ev) => {
         console.log('successfully deleted an object');
-
+        clearForm()
         //move on to the next request in the transaction or
         //commit the transaction
     };
@@ -109,11 +110,11 @@ function validateForm(evt) {
     isValid = id && name && companyName
 
     if (!isValid){
-        console.log("Wrong")
-        //need to finish code here
+        console.log("Inputs Invalid: Please fill all inputs")
+        //need to make a display message appear when we add data
     }else {
         addCompany(id, name, companyName)
-        //need to finish code here
+        //need to make a display message appear when we add data
     }
 
 }
@@ -128,6 +129,14 @@ function makeTX(storeName, mode) {
         console.warn(err);
     };
     return tx;
+
+
+}
+
+function clearForm(ev) {
+    if (ev) ev.preventDefault();
+    document.CompanyForm.reset();
+
 }
 
 
