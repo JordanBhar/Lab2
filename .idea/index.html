@@ -5,7 +5,7 @@
     <title>StudentInfoForm</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
-
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 </head>
 <body>
 
@@ -49,22 +49,22 @@
 
                         <div class="col mt-1">
                             <label>sole proprietorship</label>
-                            <input type="radio"  value="sole proprietorship" checked />
+                            <input type="radio" name="type" value="Sole Proprietorship" checked />
                         </div>
 
                         <div class="col mt-1">
                             <label>Partnership</label>
-                            <input type="radio"  value="Partnership"/>
+                            <input type="radio" name="type"  value="Partnership"/>
                         </div>
 
                         <div class="col mt-1">
                             <label>Corporation</label>
-                            <input type="radio"  value="Corporation"/>
+                            <input type="radio" name="type"  value="Corporation"/>
                         </div>
 
                         <div class="col mt-1">
                             <label>Other</label>
-                            <input type="radio"  value="Other"/>
+                            <input type="radio" name="type"  value="Other"/>
                         </div>
 
                     </div>
@@ -72,11 +72,12 @@
                 </div>
 
 
-                <div  class="alert alert-info mt-3 infobox">
+                <div  class="alert alert-info mt-3 col " id="infobox" style="visibility: hidden">
                     <p id="error1" hidden> Invitation ID, cannot be empty</p>
                     <p id="error2" hidden>Your Name, cannot be empty</p>
                     <p id="error3" hidden>Company Name, cannot be empty</p>
-                    <p id="submitmsg" hidden>Company Name, cannot be empty</p>
+                    <p id="submitmsg" hidden>Registration Info Saved</p>
+                    <p id="getmsg" hidden>Registration Info, Retrived</p>
                 </div>
 
 
@@ -102,172 +103,180 @@
 
     <script type="text/javascript">
 
-        let db;
-        let openRequest = indexedDB.open("CompanyInfoDB",2);
+        $(document).ready(function (){
 
-        openRequest.onupgradeneeded = function(e) {
-            var DB = e.target.result;
-            if(!DB.objectStoreNames.contains("Company")) {
-                //tables name is People
-                const companyTable = DB.createObjectStore("Company", {keyPath: "id"});
-            }
-        };
+            let db;
+            let openRequest = indexedDB.open("CompanyInfoDB",2);
 
-        openRequest.onsuccess = function(e) {
-            db = e.target.result;
-
-        };
-        openRequest.onerror = function(e) {
-            //console.dir(e);
-            // ..do error notification
-        }
-
-        function addCompany(ID, Name , CompanyName){
-            var addEvent = {id: ID , name: Name, companyname: CompanyName ,created: new Date()}
-
-            //open a read/write transaction
-            var tx = makeTX("Company","readwrite");
-
-            //create object store
-            var transaction = tx.objectStore("Company");
-
-            //make a request to add a new item
-            var request = transaction.add(addEvent)
-
-            request.onsuccess = (ev) => {
-                console.log('successfully added an object');
-                clearForm()
-                //move on to the next request in the transaction or
-                //commit the transaction
-            };
-            request.onerror = (err) => {
-                console.log('error in request to add');
+            openRequest.onupgradeneeded = function(e) {
+                var DB = e.target.result;
+                if(!DB.objectStoreNames.contains("Company")) {
+                    //tables name is People
+                    const companyTable = DB.createObjectStore("Company", {keyPath: "id"});
+                }
             };
 
-        }
-
-        function checkCompany(){
-
-            let id = document.getElementById("invid").value
-
-
-            var tx = makeTX("Company","readwrite");
-
-            //create object store
-            var transaction = tx.objectStore("Company");
-
-            var request = transaction.get(id)
-
-            request.onsuccess = (ev) => {
-                console.log('successfully loaded an object');
-                console.log(ev.target.result)
-                let loadedEvent = {id: ev.target.result.id , name: ev.target.result.name, companyname: ev.target.result.companyname ,created: ev.target.result.created}
-
-                document.getElementById("invid").innerHTML = loadedEvent.id
-                document.getElementById("name").innerHTML = loadedEvent.name
-                document.getElementById("companyname").innerHTML;
-
-
+            openRequest.onsuccess = function(e) {
+                db = e.target.result;
 
             };
-            request.onerror = (err) => {
-                console.log('error in request to delete');
-            };
-
-        }
-
-        function deleteCompany(evt){
-
-            let id = document.getElementById("invid").value
-
-
-            var tx = makeTX("Company","readwrite");
-
-            //create object store
-            var transaction = tx.objectStore("Company");
-
-            //make a request to add a new item
-            var request = transaction.delete(id)
-
-            request.onsuccess = (ev) => {
-                console.log('successfully deleted an object');
-                clearForm()
-                //move on to the next request in the transaction or
-                //commit the transaction
-            };
-            request.onerror = (err) => {
-                console.log('error in request to delete');
-            };
-
-        }
-
-        FormEventListener()
-
-        function FormEventListener() {
-            let addButton = document.getElementById("addCompany").addEventListener("click", validateForm)
-            let deleteButton = document.getElementById("removeCompany").addEventListener("click", deleteCompany)
-            let checkButton = document.getElementById("checkCompany").addEventListener("click", checkCompany)
-        }
-
-        function validateForm(evt) {
-
-            let isValid = false;
-
-            let id = document.getElementById("invid").value
-            let name = document.getElementById("name").value
-            let companyName = document.getElementById("companyname").value
-            let companyType = document.querySelectorAll('input[type="radio"]:checked');
-
-            if (isEmpty(id)){
-                document.getElementById("error1").hidden = true
-            }else {
-                document.getElementById("error1").hidden = false
+            openRequest.onerror = function(e) {
+                //console.dir(e);
+                // ..do error notification
             }
 
-            if (isEmpty(name)){
-                document.getElementById("error2").hidden = true
-            }else {
-                document.getElementById("error2").hidden = false
+            function addCompany(ID, Name , CompanyName, CompanyType){
+                var addEvent = {id: ID , name: Name, companyname: CompanyName, companytype: CompanyType ,created: new Date()}
+
+                //open a read/write transaction
+                var tx = makeTX("Company","readwrite");
+
+                //create object store
+                var transaction = tx.objectStore("Company");
+
+                //make a request to add a new item
+                var request = transaction.add(addEvent)
+
+                request.onsuccess = (ev) => {
+                    console.log('successfully added an object');
+                    clearForm()
+                    alert("Registration Info Saved")
+
+                };
+                request.onerror = (err) => {
+                    console.log('error in request to add');
+                };
+
             }
 
-            if (isEmpty(companyName)){
-                document.getElementById("error3").hidden = true
-            }else {
-                document.getElementById("error3").hidden = false
+            function checkCompany(){
+
+                let id = $("#invid").val()
+
+                if (isFull(id)){
+                    var tx = makeTX("Company","readwrite");
+
+                    //create object store
+                    var transaction = tx.objectStore("Company");
+
+                    var request = transaction.get(id)
+
+                    request.onsuccess = (ev) => {
+                        console.log('successfully loaded an object');
+                        console.log(ev.target.result)
+                        let loadedEvent = {id: ev.target.result.id , name: ev.target.result.name, companyname: ev.target.result.companyname, companytype: ev.target.result.companytype ,created: ev.target.result.created}
+
+                        $("#invid").val(loadedEvent.id)
+                        $("#name").val(loadedEvent.name)
+                        $("#companyname").val(loadedEvent.companyname)
+                        alert("Registeration was successfully retrived!")
+                    };
+                    request.onerror = (err) => {
+                        console.log('error in request to delete');
+                    };
+                }else{
+                    alert("Invitation ID, cannot be empty")
+                }
+
+
             }
 
+            function deleteCompany(evt){
 
-            isValid = isEmpty(id) && isEmpty(name) && isEmpty(companyName)
+                let id = $("#invid").val()
 
-            if (!isValid){
-                console.log("Inputs Invalid: Please fill all inputs")
-                //need to make a display message appear when we add data
-            }else {
-                addCompany(id, name, companyName)
-                //need to make a display message appear when we add data
+
+                if (isFull(id)){
+                    var tx = makeTX("Company","readwrite");
+
+                    //create object store
+                    var transaction = tx.objectStore("Company");
+
+                    //make a request to add a new item
+                    var request = transaction.delete(id)
+
+                    request.onsuccess = (ev) => {
+                        console.log('successfully deleted an object');
+                        alert("Registeration was sucessfully deleted")
+                        clearForm()
+
+                    };
+                    request.onerror = (err) => {
+                        console.log('error in request to delete');
+                    };
+                }else {
+                    alert("Invitation ID, cannot be empty")
+                }
             }
 
-        }
+            FormEventListener()
 
-        function isEmpty(input){
-            return (input.length > 0)
-        }
+            function FormEventListener() {
+                let addButton = $("#addCompany").click(validateForm)
+                let deleteButton = $("#removeCompany").click(deleteCompany)
+                let checkButton = $("#checkCompany").click(checkCompany)
+            }
 
-        function makeTX(storeName, mode) {
-            let tx = db.transaction(storeName, mode);
-            tx.onerror = (err) => {
-                console.warn(err);
-            };
-            return tx;
+            function validateForm(evt) {
 
+                let isValid = false;
+                let id = $("#invid").val()
+                let name = $("#name").val()
+                let companyName = $("#companyname").val()
+                //this is a smart way to get the SELECTED radio button without having to do a foreach loop to determine which radiobutton has the value of checked = true
+                let companyType = document.querySelector('input[name="type"]:checked').value
 
-        }
+                //NOTE: if you use Jquery you dont need to have the preset error paragraphs in the HTML portion just write to the infobox
 
-        function clearForm(ev) {
-            if (ev) ev.preventDefault();
-            document.CompanyForm.reset();
+                if (!isFull(id)){
+                    alert("Invitation ID, cannot be empty")
+                }
+                if (!isFull(name)){
+                    alert("Your Name, cannot be empty")
+                }
+                if (!isFull(companyName)){
+                    alert("Company Name, cannot be empty")
+                }
 
-        }
+                isValid = isFull(id) && isFull(name) && isFull(companyName)
+
+                if (!isValid){
+                    console.log("Inputs Invalid: Please fill all inputs")
+                    //need to make a display message appear when we add data
+                }else {
+                    addCompany(id, name, companyName, companyType)
+                    //need to make a display message appear when we add data
+                }
+
+            }
+
+            function isFull(input){
+                return (input.length > 0)
+            }
+
+            function makeTX(storeName, mode) {
+                let tx = db.transaction(storeName, mode);
+                tx.onerror = (err) => {
+                    console.warn(err);
+                };
+                return tx;
+            }
+
+            function clearForm(ev) {
+                if (ev) ev.preventDefault();
+                document.CompanyForm.reset();
+
+            }
+
+            function alert(msg){
+                $("#infobox").css('visibility','visible')
+                $("#infobox").append(msg)
+                setTimeout(function (){$("#infobox").css('visibility','hidden'), $("#infobox").text("")}, 3000)
+
+            }
+
+        });
+
     </script>
 
 </div>
